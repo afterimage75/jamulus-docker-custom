@@ -1,6 +1,6 @@
 FROM alpine:3.11 as builder
 
-ENV JAMULUS_VERSION 3_8_2
+ENV JAMULUS_VERSION 3_9_1
 
 RUN \
  echo "**** updating system packages ****" && \
@@ -21,7 +21,7 @@ RUN \
    wget "https://github.com/jamulussoftware/jamulus/archive/r${JAMULUS_VERSION}.tar.gz" && \
    tar xzf r${JAMULUS_VERSION}.tar.gz
 
-# Github directory format for tar.gz export
+
 WORKDIR /tmp/jamulus-r${JAMULUS_VERSION}
 RUN \
  echo "**** compiling source code ****" && \
@@ -38,4 +38,7 @@ RUN apk add --update --no-cache \
     qt5-qtbase-x11 icu-libs tzdata
 
 COPY --from=builder /usr/local/bin/Jamulus /usr/local/bin/Jamulus
+
 ENTRYPOINT ["Jamulus"]
+RUN renice -20 1
+RUN ionice -c 1 -p 1
