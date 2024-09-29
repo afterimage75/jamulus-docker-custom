@@ -26,7 +26,7 @@ WORKDIR /tmp/jamulus-r${JAMULUS_VERSION}
 RUN \
  echo "**** compiling source code ****" && \
    qmake "CONFIG+=nosound headless serveronly" Jamulus.pro && \
-   make clean && \
+   make distclean && \
    make && \
    cp Jamulus /usr/local/bin/ && \
    rm -rf /tmp/* && \
@@ -39,6 +39,6 @@ RUN apk add --update --no-cache \
 
 COPY --from=builder /usr/local/bin/Jamulus /usr/local/bin/Jamulus
 
-CMD ["/usr/bin/nice","-n","-20","/usr/bin/ionice","-c","1","/usr/local/bin/jamulus-headless","-d -e 127.0.0.1 -F -n -o '├DaGarage Online┤;Asbury Park, NJ;us' -P -R /Jamulus/Recordings/Private -s -T -u 14 -w /Jamulus/Web/motd-jamulus-private.htm -Q 46 -p 22125"]
+CMD ["/usr/bin/nice","-n","-20","/usr/bin/ionice","-c","1","/usr/local/bin/Jamulus","-d -e 127.0.0.1 -F -n -o '├DaGarage Online┤;Asbury Park, NJ;us' -P -R /Jamulus/Recordings/Private -s -T -u 14 -w /Jamulus/Web/motd-jamulus-private.htm -Q 46 -p 22125"]
 
 ENTRYPOINT ["Jamulus"]
