@@ -1,30 +1,42 @@
-RUN echo "*** updating system packages ***"; \ 
-    apt-get -qq update
+FROM alpine:3.11 as builder
 
-RUN echo "*** prepare build environment ***"; \
-    apt-get -y install --no-install-recommends wget devscripts build-essential qtbase5-dev qttools5-dev-tools
+ENV JAMULUS_VERSION 3_11_0
 
-WORKDIR /tmp    
-RUN echo "*** fetch jamulus source ***"; \
-    wget https://github.com/jamulussoftware/jamulus/archive/latest.tar.gz; \
-    tar xzf latest.tar.gz
-    
-WORKDIR /tmp/jamulus-docker   
-RUN echo "*** compile jamulus ***"; \
-   qmake "CONFIG+=nosound headless serveronly" Jamulus.pro; \
-   make distclean; \
-   make; \
-   cp Jamulus /usr/local/bin/jamulus-headless; \
-   jamulus-headless --version
+RUN \
+ echo "**** updating system packages ****" && \
+ apk update
 
-RUN echo "*** clean up build environment ***"; \
-   rm -rf /tmp/*; \
-   apt-get --purge -y remove wget devscripts build-essential qtbase5-dev qttools5-dev-tools; \
-   apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-   
-RUN echo "*** prepare run environment ***"; \
-   apt-get -y install --no-install-recommends tzdata procps libqt5core5a libqt5network5 libqt5xml5
+RUN \
+ echo "**** install build packages ****" && \
+   apk add --no-cache --virtual .build-dependencies \
+        build-base \
+        wget \
+        qt5-qtbase-dev \
+        qt5-qttools-dev \
+        qtchooser
 
-CMD ["/usr/bin/nice","-n","-20","/usr/bin/ionice","-c","1","/usr/local/bin/jamulus-headless","-d -e 127.0.0.1 -F -n -o '├DaGarage Online┤;Asbury Park, NJ;us' -P -R /Jamulus/Recordings/Private -s -T -u 14 -w /Jamulus/Web/motd-jamulus-private.htm -Q 46 -p 22125"]
+WORKDIR /tmp
+RUN \
+ echo "**** getting source code ****" && \
+   wget "https://github.com/jamulussoftware/jamulus/releases/tag/r${JAMULUS_VERSION}.tar.gz" && \
+   tar xzf r${JAMULUS_VERSION}.tar.gz
+
+
+WORKDIR /tmp/jamulus-r${JAMULUS_VERSION}
+RUN \
+ echo "**** compiling source code ****" && \
+   qmake "CONFIG+=nosound headless serveronly" Jamulus.pro && \
+   make clean && \
+   make && \
+   cp Jamulus /usr/local/bin/ && \
+   rm -rf /tmp/* && \
+   apk del .build-dependencies
+
+FROM alpine:3.11
+
+RUN apk add --update --no-cache \
+    qt5-qtbase-x11 icu-libs tzdata
+
+COPY --from=builder /usr/local/bin/Jamulus /usr/local/bin/Jamulus
 
 ENTRYPOINT ["Jamulus"]
