@@ -1,6 +1,6 @@
 FROM alpine:3.11 as builder
 
-ENV JAMULUS_VERSION 3_11_0
+ENV JAMULUS_VERSION latest
 
 RUN \
  echo "**** updating system packages ****" && \
@@ -22,11 +22,11 @@ RUN \
    tar xzf latest.tar.gz
 
 
-WORKDIR /tmp/jamulus-r${JAMULUS_VERSION}
+WORKDIR /tmp/Jamulus-latest
 RUN \
  echo "**** compiling source code ****" && \
-   qmake "CONFIG+=nosound headless serveronly" Jamulus.pro && \
-   make distclean && \
+   qmake "CONFIG+=nosound headless" Jamulus.pro && \
+   make clean && \
    make && \
    cp Jamulus /usr/local/bin/ && \
    rm -rf /tmp/* && \
