@@ -30,3 +30,5 @@ RUN echo "*** prepare run environment ***"; \
    apt-get -y install --no-install-recommends tzdata procps libqt5core5a libqt5network5 libqt5xml5
 
 ENTRYPOINT ["Jamulus"]
+
+CMD ["/usr/bin/nice","-n","-20","/usr/bin/ionice","-c","1","/usr/local/bin/Jamulus","--version"]
