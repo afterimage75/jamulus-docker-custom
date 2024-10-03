@@ -10,7 +10,7 @@ RUN echo "*** prepare build environment ***"; \
 
 WORKDIR /tmp    
 RUN echo "*** fetch jamulus source ***"; \
-    wget https://github.com/jamulussoftware/jamulus/archive/${VERSION}.tar.gz; \
+    wget https://github.com/jamulussoftware/jamulus/archive/latest.tar.gz; \
     tar xzf latest.tar.gz
     
 WORKDIR /tmp/jamulus-${VERSION}   
@@ -19,7 +19,7 @@ RUN echo "*** compile jamulus ***"; \
    make clean; \
    make; \
    cp Jamulus /usr/local/bin/Jamulus; \
-   Jamulus --version
+   chmod +x /usr/local/bin/Jamulus
 
 RUN echo "*** clean up build environment ***"; \
    rm -rf /tmp/*; \
@@ -29,6 +29,6 @@ RUN echo "*** clean up build environment ***"; \
 RUN echo "*** prepare run environment ***"; \
    apt-get -y install --no-install-recommends tzdata procps libqt5core5a libqt5network5 libqt5xml5
 
-ENTRYPOINT ["Jamulus"]
+ENTRYPOINT ["nice", "-n", "-20", "ionice", "-c", "1", "Jamulus"]
 
-CMD ["/usr/bin/nice","-n","-20","/usr/bin/ionice","-c","1","/usr/local/bin/Jamulus","--version"]
+CMD ["-d", "-e", "anygenre2.jamulus.io:22224", "-F", "-n", "-o", "├ DaGarage Online ┤;Asbury Park, NJ;us", "-P", "-R", "/Jamulus/Recordings/Public", "-s", "-T", "-u", "14", "-w", "/Jamulus/Web/motd-jamulus-public.htm", "-Q", "46", "-p", "22124"]
